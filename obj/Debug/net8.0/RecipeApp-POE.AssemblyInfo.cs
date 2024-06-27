@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("RecipeApp-POE")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c18e38e10369881a352f4442207214d5b723c5bf")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+03baeb81d37e5102f6414acfa779cbd56514e8d3")]
 [assembly: System.Reflection.AssemblyProductAttribute("RecipeApp-POE")]
 [assembly: System.Reflection.AssemblyTitleAttribute("RecipeApp-POE")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

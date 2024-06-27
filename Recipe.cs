@@ -8,45 +8,55 @@ using System.Collections.Generic;
 
 namespace RecipeApp_POE
 {
-    //This is the recipe class. All the arrays used to store information in the progrram belong to this class
-    internal class Recipe
+    //This is the recipe class.
+    //All the lists used to store information in the progrram belong to this class
+    //Various methods used in this program are also part of this class
+    public class Recipe
     {
+        // Declare the caloriesExceed300 event using the CaloriesExceed300Handler delegate. This event is triggered
+        // when the calorie count exceeds 300. The event can be null if no handlers are attached.
         public static event CaloriesExceed300Handler? caloriesExceed300;
+
+        // Define a delegate named CaloriesExceed300Handler that specifies the method signature for handlers of the
+        // caloriesExceed300 event. The delegate takes a nullable double (double?) parameter that represents the total calories
         public delegate void CaloriesExceed300Handler(double? totalCalories);
 
-        public int Num_ingredients { get; set; }
-        public double? totalCalories { get; set; }
-        public List<string> Ingredients = new List<string>();
-        public List<double> IngredientQuantities = new List<double>();
-        public List<double> IngredientQuantitiesScaled = new List<double>();
-        public List<string> IngredientUnitsOfMeasurement = new List<string>();
-        public List<string> recipeUnitsToDisplay = new List<string>();
-        public List<string> Steps = new List<string>();
-        public List<string> FoodGroups = new List<string>();
 
         //____________________ CODE ATTRIBUTION _______________________________________
         //The following layout  of using automatic properties (shorthand) was taken from W3 Schools 
         // Link: https://www.w3schools.com/cs/cs_properties.php (Accessed 15 April 2024)
+        public string Name { get; set; }
+        public int Num_ingredients { get; set; }
         public int Num_steps { get; set; }
         public double ScaleFactor { get; set; }
-        public string Name { get; set; }
+        public double? totalCalories { get; set; }
 
-        public Recipe() {
+
+        //____________________ CODE ATTRIBUTION _______________________________________
+        //The following layout of how to use Lists in C# was taken from GeeksForGeeks 
+        // Link: https://www.geeksforgeeks.org/c-sharp-list-class/ (Accessed 12 May 2024)
+        public List<string> Ingredients = new List<string>();
+        public List<double> IngredientQuantities = new List<double>();
+        public List<double> IngredientQuantitiesScaled = new List<double>();
+        public List<string> IngredientUnitsOfMeasurement = new List<string>();
+        public List<double> IngredientCalories = new List<double>();
+        public List<string> recipeUnitsToDisplay = new List<string>();
+        public List<string> Steps = new List<string>();
+        public List<string> FoodGroups = new List<string>();
+
+        public Recipe()
+        {
             totalCalories = 0;
         }
 
-    public static Dictionary<string, Tuple<double, string>> conversionsDict = new Dictionary<string, Tuple<double, string>>() {
+        public static Dictionary<string, Tuple<double, string>> conversionsDict = new Dictionary<string, Tuple<double, string>>() {
                 {"tablespoon", Tuple.Create(16.0, "cup") },
                 {"tablespoons", Tuple.Create(16.0, "cup") },
                 {"teaspoon", Tuple.Create(48.0, "cup") },
                 {"teaspoons", Tuple.Create(48.0, "cup") },
             };
 
-        public static void addNewRecipe()
-        {
-            Recipe recipe = new Recipe();
-        }
-        //Method 1:
+        //METHOD 1:
         //This method validates user input. When a user is required to enter an int input, it ensures they have done accordingly.
         public static int? checkIntInput(string userInput)
         {
@@ -67,7 +77,7 @@ namespace RecipeApp_POE
             return userInputInt;
         }
 
-        //Method 2:
+        //METHOD 2:
         //This method validates user input. When a user is required to enter an double input, it ensures they have done accordingly.
         public static double? checkDoubleInput(string userInput)
         {
@@ -85,8 +95,9 @@ namespace RecipeApp_POE
             return userInputDouble;
         }
 
-        //Method 3:
+        //METHOD 3:
         //This method allows the user to enter all the recipe details, captures it and saves it in lists
+        //as well as saves the recipe object in the allRecipes dictionary of the RecipeManager class
         public void enterRecipeDetails(Recipe recipe)
         {
 
@@ -102,6 +113,7 @@ namespace RecipeApp_POE
             } while (userInputChecked == null);
             recipe.Num_ingredients = userInputChecked.Value;
 
+            //Get all the necessary information regarding each ingredient from the user
             for (int i = 0; i < recipe.Num_ingredients; i++)
             {
                 Console.Write("\nName of Ingredient " + (i + 1) + ": ");
@@ -125,12 +137,14 @@ namespace RecipeApp_POE
                     Console.Write("Number of calories for Ingredient " + (i + 1) + ": ");
                     caloriesChecked = checkDoubleInput(Console.ReadLine());
                 } while (caloriesChecked == null);
-                recipe.totalCalories += caloriesChecked;
+                addCalories(recipe, caloriesChecked);
+                recipe.IngredientCalories.Add(caloriesChecked.Value);
 
                 if (recipe.totalCalories > 300)
                 {
                     caloriesExceed300?.Invoke(recipe.totalCalories);
                 }
+                ProvideCalorieContextPerIngredient(caloriesChecked);
 
                 bool foodGroupEntered = false;
                 string foodGroup = null;
@@ -142,30 +156,37 @@ namespace RecipeApp_POE
                     {
                         case "1":
                             foodGroup = "Starchy foods";
+                            Console.WriteLine("Starchy foods are a good source of energy and the main source of a range of nutrients in our diet.");
                             foodGroupEntered = true;
                             break;
                         case "2":
                             foodGroup = "Vegetables and fruits";
+                            Console.WriteLine("Rich in vitamins, minerals, and fiber, vegetables and fruits are essential for good health and may reduce the risk of disease.");
                             foodGroupEntered = true;
                             break;
                         case "3":
                             foodGroup = "Dry beans, peas, lentils and soya";
+                            Console.WriteLine("These are great sources of protein and fiber, which help in muscle repair and can aid digestion.");
                             foodGroupEntered = true;
                             break;
                         case "4":
                             foodGroup = "Chicken, fish, meat and eggs";
+                            Console.WriteLine("Important sources of high-quality protein and other essential nutrients like omega-3 fatty acids (from fish).");
                             foodGroupEntered = true;
                             break;
                         case "5":
                             foodGroup = "Milk and dairy products";
+                            Console.WriteLine("These provide calcium, which is essential for healthy bones and teeth, as well as being a source of protein and vitamins.");
                             foodGroupEntered = true;
                             break;
                         case "6":
                             foodGroup = "Fats and oil";
+                            Console.WriteLine("Essential for long-term energy, absorption of certain vitamins, and cell function. Use in moderation.");
                             foodGroupEntered = true;
                             break;
                         case "7":
                             foodGroup = "Water";
+                            Console.WriteLine("Essential for life, water plays a critical role in every bodily function, from digestion to temperature regulation.");
                             foodGroupEntered = true;
                             break;
                         default:
@@ -179,7 +200,7 @@ namespace RecipeApp_POE
 
                 recipe.recipeUnitsToDisplay.Add(unitOfMeasurement);
                 recipe.IngredientUnitsOfMeasurement.Add(unitOfMeasurement);
-                
+
             }
             userInputChecked = null;
             do
@@ -197,7 +218,20 @@ namespace RecipeApp_POE
             Console.WriteLine("\nYour recipe has been added!");
         }
 
-        //Method 4:
+        //METHOD 4:
+        //This method displays all the recipes to the user in alphabetical order
+        public void displayAllRecipes()
+        {
+            var sortedKeys = RecipeManager.allRecipes.Keys.OrderBy(key => key);
+
+            // Printing the sorted keys
+            foreach (var key in sortedKeys)
+            {
+                Console.WriteLine(key);
+            }
+        }
+
+        //METHOD 5:
         //This method displays the full recipe details in a neat format to the user 
         public void displayRecipe(Recipe recipe)
         {
@@ -213,7 +247,7 @@ namespace RecipeApp_POE
             Console.WriteLine("\nINGREDIENTS:");
             for (int i = 0; i < recipe.Num_ingredients; i++)
             {
-                Console.WriteLine("- " + recipe.IngredientQuantitiesScaled[i] + " " + recipe.recipeUnitsToDisplay[i] + " " + recipe.Ingredients[i] + " (" + recipe.FoodGroups[i] + ")");
+                Console.WriteLine("- " + recipe.IngredientQuantitiesScaled[i] + " " + recipe.recipeUnitsToDisplay[i] + " " + recipe.Ingredients[i] + " (" + recipe.FoodGroups[i] + ")  -  " + recipe.IngredientCalories[i] + " calories");
             }
             Console.WriteLine("\nSTEPS:");
             for (int i = 0; i < recipe.Num_steps; i++)
@@ -225,9 +259,55 @@ namespace RecipeApp_POE
             {
                 caloriesExceed300?.Invoke(recipe.totalCalories);
             }
+            ProvideCalorieExplanation(recipe);
         }
 
-        //Method 5:
+        //METHOD 6:
+        //This method calculates the totalCalories by adding the calories for each ingredient to the totalCalories property of the recipe object
+        public void addCalories(Recipe recipe, double? calories)
+        {
+            recipe.totalCalories += calories;
+        }
+
+        //METHOD 7:
+        //This method provides an explanation based on the calorie count for the whole recipe
+        public void ProvideCalorieExplanation(Recipe recipe)
+        {
+            if (recipe.totalCalories <= 200)
+            {
+                Console.WriteLine("This is a low-calorie dish, ideal for weight loss or maintenance diets.");
+            }
+            else if (recipe.totalCalories <= 300)
+            {
+                Console.WriteLine("This dish has a moderate calorie count, suitable for everyday meals.");
+            }
+            else if (recipe.totalCalories <= 400)
+            {
+                Console.WriteLine("While slightly above typical daily meal recommendations, it's still manageable.");
+            }
+            else if (recipe.totalCalories <= 600)
+            {
+                Console.WriteLine("This is a high-calorie dish, best suited for post-workout meals or if you're trying to gain weight.");
+            }
+            else
+            {
+                Console.WriteLine("This dish is very high in calories and should be consumed sparingly unless under specific dietary needs.");
+            }
+        }
+
+        //METHOD 8:
+        //This method provides an explanation based on the calorie count for each ingredient of the recipe
+        private void ProvideCalorieContextPerIngredient(double? calorie)
+        {
+            if (calorie < 50)
+                Console.WriteLine("This is a low-calorie ingredient, helpful for weight management.");
+            else if (calorie < 200)
+                Console.WriteLine("This ingredient has a moderate calorie count, fitting well into balanced meals.");
+            else
+                Console.WriteLine("This is a high-calorie ingredient, best used sparingly unless energy needs are high.");
+        }
+
+        //METHOD 9:
         //This method halves the ingredient quantities 
         public void halfRecipe(Recipe recipe)
         {
@@ -237,7 +317,7 @@ namespace RecipeApp_POE
             }
         }
 
-        //Method 6:
+        //METHOD 10:
         //This method doubles the ingredient quantities 
         public void doubleRecipe(Recipe recipe)
         {
@@ -247,7 +327,7 @@ namespace RecipeApp_POE
             }
         }
 
-        //Method 7:
+        //METHOD 11:
         //This method triples the ingredient quantities 
         public void tripleRecipe(Recipe recipe)
         {
@@ -257,6 +337,7 @@ namespace RecipeApp_POE
             }
         }
 
+        //METHOD 12:
         /*
        * The `ScaleAndConvertUnits` method in the Recipe application is designed to adjust the quantities of
        * ingredients based on a specified scaling factor—either 'half', 'double', or 'triple'.
@@ -306,6 +387,15 @@ namespace RecipeApp_POE
         //____________________ CODE ATTRIBUTION _______________________________________
         //The layout above of how to convert units of measurements when they reach a certain threshold was taken from OpenAI - ChatGPT 
         // I looked at the logic, adapted it to suit my code and implemented it (Accessed 15 April 2024)
+
+        //METHOD 13:
+        //This method informs the user that the recipe doesn't exist
+        public void recipeNonExistent()
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("That recipe doesn't exist");
+            Console.ForegroundColor = ConsoleColor.Gray;
+        }
     }
 
 }
